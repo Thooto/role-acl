@@ -2208,4 +2208,19 @@ describe('Test Suite: Access Control', function () {
             resourceProfileId: 2
         }).execute('read').sync().on('resource')).granted).toEqual(false);
     })
+
+    it('should allow to use json path in the EQUALS condition args keys with "boolean-negative" values', function () {
+        let ac = this.ac;
+
+        ac.grant('user').condition({Fn: 'EQUALS', args: {
+            '$.unwantedAttribute': undefined
+        }}).execute('read').on('resource')
+
+        expect((ac.can('user').context({
+        }).execute('read').sync().on('resource')).granted).toEqual(true);
+
+        expect((ac.can('user').context({
+            unwantedAttribute: 2,
+        }).execute('read').sync().on('resource')).granted).toEqual(false);        
+    })
 });

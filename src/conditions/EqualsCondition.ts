@@ -26,8 +26,13 @@ export class EqualsCondition implements IConditionFunction {
 
         return Object.keys(args).every((key) => {
             const contextKeyValue = ConditionUtil.getValueByKey(context, key);
+
+            if (!contextKeyValue) {
+                return args[key] === contextKeyValue;
+            }
+
             return CommonUtil.matchesAnyElement(args[key], (elm) => {
-                return contextKeyValue && ConditionUtil.getValueByPath(context, elm) === contextKeyValue;
+                return ConditionUtil.getValueByPath(context, elm) === contextKeyValue;
             });
         });
     }
