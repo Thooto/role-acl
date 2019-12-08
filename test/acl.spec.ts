@@ -2182,4 +2182,30 @@ describe('Test Suite: Access Control', function () {
 
         expect((ac.can('user').execute('create').sync().on('non-existent')).granted).toEqual(false);
     });
+
+    it('should allow to use json path in the EQUALS condition args keys', function () {
+        let ac = this.ac;
+
+        ac.grant('user').condition({Fn: 'EQUALS', args: {
+            '$.resourceProfileId': '$.loginProfileId'
+        }}).execute('read').on('resource')
+
+        expect((ac.can('user').context({
+            resourceProfileId: 2,
+            loginProfileId: 2
+        }).execute('read').sync().on('resource')).granted).toEqual(true);
+
+        expect((ac.can('user').context({
+            resourceProfileId: 2,
+            loginProfileId: 3
+        }).execute('read').sync().on('resource')).granted).toEqual(false);
+        
+        expect((ac.can('user').context({
+            loginProfileId: 3
+        }).execute('read').sync().on('resource')).granted).toEqual(false);
+        
+        expect((ac.can('user').context({
+            resourceProfileId: 2
+        }).execute('read').sync().on('resource')).granted).toEqual(false);
+    })
 });

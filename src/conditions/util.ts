@@ -47,4 +47,12 @@ export class ConditionUtil {
         }
         return valuePathOrValue;
     }
+
+    public static getValueByKey(context: any, valuePathOrValue: any) {
+        // Check if the value is JSONPath
+        if (typeof valuePathOrValue === 'string' && valuePathOrValue.startsWith('$.')) {
+            return JSONPath({ path: valuePathOrValue, json: context, wrap: false });
+        }
+        return context[valuePathOrValue];
+    }
 }
