@@ -2223,4 +2223,37 @@ describe('Test Suite: Access Control', function () {
             unwantedAttribute: 2,
         }).execute('read').sync().on('resource')).granted).toEqual(false);        
     })
+
+    it('should allow to specify query in filter options and not alter if not "true" specified', function () {
+        let ac = this.ac;
+
+        ac.grant('user').action('read').on('resource', ['a', 'b', 'C.d']);
+
+        expect((ac.can('user').execute('read').sync().on('resource')).filter({
+            attributes: ['a', 'b', 'c'],
+            include: [{ model: 'C', attributes: ['d', 'e'] }]
+        }, { query: true })).toEqual({
+            attributes: ['a', 'b'],
+            include: [{ model: 'C', attributes: ['d'] }]
+        });
+
+        expect((ac.can('user').execute('read').sync().on('resource')).filter({
+            a: 'a',
+            c: 'c',
+            C: { d: 'd', e: 'e' }
+        }, { query: false })).toEqual({
+            a: 'a',
+            C: { d: 'd' }
+        });
+
+        expect((ac.can('user').execute('read').sync().on('resource')).filter({
+            a: 'a',
+            b: 'b',
+            C: { d: 'd', e: 'e' }
+        })).toEqual({
+            a: 'a',
+            b: 'b',
+            C: { d: 'd' }
+        });
+    })
 });

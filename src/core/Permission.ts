@@ -130,8 +130,53 @@ class Permission {
      *  @returns {Object|Array}
      *           The filtered data object.
      */
-    filter(data: any) {
+    filter(data: any, options: { query: boolean }) {
+        if (options && options.query === true) {
+            return this.filterQuery(data);
+        }
+
         return CommonUtil.filterAll(data, this.attributes);
+    }
+    
+    filterQuery(query: any) {
+        const attributes = CommonUtil.filterAll(
+            this.buildAttributes(query),
+            this.attributes
+        );
+
+        this.injectAttributes(query, attributes);
+
+        return query;
+    }
+
+    buildAttributes(query: any, attributes: any = {}) {
+        if (query.attributes) {
+            query.attributes.forEach(
+                (attribute: string) => (attributes[attribute] = null)
+            );
+        }
+    
+        if (query.include) {
+            query.include.forEach((include: any) => {
+                attributes[include.model] = {};
+    
+                this.buildAttributes(include, attributes[include.model]);
+            });
+        }
+    
+        return attributes;
+    }
+
+    injectAttributes(query: any, attributes: any) {
+        query.attributes = Object.keys(attributes).filter(
+            key => attributes[key] === null
+        );
+
+        if (query.include) {
+            query.include.forEach((include: any) =>
+                this.injectAttributes(include, attributes[include.model])
+            );
+        }
     }
 
 }
