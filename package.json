@@ -1,5 +1,5 @@
 {
-  "name": "role-acl",
+  "name": "@thooto/role-acl",
   "version": "4.3.2",
   "description": "Role, Attribute and Condition based Access Control for Node.js",
   "main": "./index.js",
