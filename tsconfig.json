@@ -3,7 +3,7 @@
     "compilerOptions": {
         "declaration": true,
         "declarationDir": "./lib",
-        "target": "es6",
+        "target": "es5",
         "module": "commonjs",
         "esModuleInterop": true,
         "moduleResolution": "node",
@@ -26,7 +26,6 @@
     },
     "include": [
         "./src/**/*.ts",
-        "test/**/*.ts"
     ],
     "exclude": [
         "./node_modules",
