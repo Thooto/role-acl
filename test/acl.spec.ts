@@ -2230,6 +2230,8 @@ describe('Test Suite: Access Control', function () {
         ac.grant('user').action('read').on('A', ['a', 'b', 'C.d']);
         ac.grant('user').action('read').on('B', ['*', '!c', '!C.e']);
         ac.grant('user').action('read').on('C', ['*', '!D.*', 'D.e']);
+        ac.grant('user').action('read').on('D');
+        ac.grant('user').action('read').on('E', []);
 
         expect((ac.can('user').execute('read').sync().on('A')).filter({
             attributes: ['a', 'b', 'c'],
@@ -2272,6 +2274,22 @@ describe('Test Suite: Access Control', function () {
         }, { query: true })).toEqual({
             attributes: [],
             include: [{ model: 'D', attributes: ['e'] }]
+        });
+
+        expect((ac.can('user').execute('read').sync().on('D')).filter({
+            attributes: ['a', 'b'],
+            include: [{ model: 'D', attributes: ['d'] }]
+        }, { query: true })).toEqual({
+            attributes: ["a", "b"],
+            include: [{ model: 'D', attributes: ['d'] }]
+        });
+
+        expect((ac.can('user').execute('read').sync().on('E')).filter({
+            attributes: ['a', 'b'],
+            include: [{ model: 'D', attributes: ['d'] }]
+        }, { query: true })).toEqual({
+            attributes: [],
+            include: [{ model: 'D', attributes: [] }]
         });
     })
 });

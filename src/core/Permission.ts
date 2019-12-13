@@ -168,9 +168,9 @@ class Permission {
     }
 
     injectAttributes(query: any, attributes: any) {
-        query.attributes = Object.keys(attributes).filter(
-            key => attributes[key] === null
-        );
+        query.attributes = attributes
+            ? Object.keys(attributes).filter(key => attributes[key] === null)
+            : [];
 
         if (query.include) {
             query.include.forEach((include: any) =>
