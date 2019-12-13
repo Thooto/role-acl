@@ -130,7 +130,7 @@ class Permission {
      *  @returns {Object|Array}
      *           The filtered data object.
      */
-    filter(data: any, options: { query: boolean }) {
+    filter(data: any, options?: { query: boolean }) {
         if (options && options.query === true) {
             return this.filterQuery(data);
         }
