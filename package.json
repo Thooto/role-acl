@@ -1,6 +1,6 @@
 {
   "name": "@thooto/role-acl",
-  "version": "4.3.4",
+  "version": "4.3.5",
   "description": "Role, Attribute and Condition based Access Control for Node.js",
   "main": "./index.js",
   "directories": {
