@@ -2227,9 +2227,11 @@ describe('Test Suite: Access Control', function () {
     it('should allow to specify query in filter options and not alter if not "true" specified', function () {
         let ac = this.ac;
 
-        ac.grant('user').action('read').on('resource', ['a', 'b', 'C.d']);
+        ac.grant('user').action('read').on('A', ['a', 'b', 'C.d']);
+        ac.grant('user').action('read').on('B', ['*', '!c', '!C.e']);
+        ac.grant('user').action('read').on('C', ['*', '!D.*', 'D.e']);
 
-        expect((ac.can('user').execute('read').sync().on('resource')).filter({
+        expect((ac.can('user').execute('read').sync().on('A')).filter({
             attributes: ['a', 'b', 'c'],
             include: [{ model: 'C', attributes: ['d', 'e'] }]
         }, { query: true })).toEqual({
@@ -2237,7 +2239,7 @@ describe('Test Suite: Access Control', function () {
             include: [{ model: 'C', attributes: ['d'] }]
         });
 
-        expect((ac.can('user').execute('read').sync().on('resource')).filter({
+        expect((ac.can('user').execute('read').sync().on('A')).filter({
             a: 'a',
             c: 'c',
             C: { d: 'd', e: 'e' }
@@ -2246,7 +2248,7 @@ describe('Test Suite: Access Control', function () {
             C: { d: 'd' }
         });
 
-        expect((ac.can('user').execute('read').sync().on('resource')).filter({
+        expect((ac.can('user').execute('read').sync().on('A')).filter({
             a: 'a',
             b: 'b',
             C: { d: 'd', e: 'e' }
@@ -2254,6 +2256,22 @@ describe('Test Suite: Access Control', function () {
             a: 'a',
             b: 'b',
             C: { d: 'd' }
+        });
+
+        expect((ac.can('user').execute('read').sync().on('B')).filter({
+            attributes: ['a', 'b', 'c'],
+            include: [{ model: 'C', attributes: ['d', 'e'] }]
+        }, { query: true })).toEqual({
+            attributes: ['a', 'b'],
+            include: [{ model: 'C', attributes: ['d'] }]
+        });
+
+        expect((ac.can('user').execute('read').sync().on('C')).filter({
+            // If no attributes are specified, it should injects them
+            include: [{ model: 'D', attributes: ['d', 'e'] }]
+        }, { query: true })).toEqual({
+            attributes: [],
+            include: [{ model: 'D', attributes: ['e'] }]
         });
     })
 });
