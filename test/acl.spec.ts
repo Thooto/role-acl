@@ -2186,7 +2186,7 @@ describe('Test Suite: Access Control', function () {
     it('should allow to use json path in the EQUALS condition args keys', function () {
         let ac = this.ac;
 
-        ac.grant('user').condition({Fn: 'EQUALS', args: {
+        ac.grant('user').condition({ Fn: 'EQUALS', args: {
             '$.resourceProfileId': '$.loginProfileId'
         }}).execute('read').on('resource')
 
@@ -2207,6 +2207,89 @@ describe('Test Suite: Access Control', function () {
         expect((ac.can('user').context({
             resourceProfileId: 2
         }).execute('read').sync().on('resource')).granted).toEqual(false);
+
+        // More complex usecase
+        ac.grant('user').condition({ Fn: 'EQUALS', args: {
+            '$.a.b[?(@.c=="C")].n.dId':'$.d.id'
+        }}).execute('read').on('A')
+
+        expect((ac.can('user').context({
+            a: {
+                b: [
+                    {
+                        c: 'C',
+                        n: {
+                            dId: 2
+                        }
+                    }
+                ]
+            },
+            d: {
+                id: 2
+            }
+        }).execute('read').sync().on('A')).granted).toEqual(true);        
+
+        expect((ac.can('user').context({
+            a: {
+                b: [
+                    {
+                        c: 'C',
+                        n: {
+                            dId: 3
+                        }
+                    }
+                ]
+            },
+            d: {
+                id: 2
+            }
+        }).execute('read').sync().on('A')).granted).toEqual(false);        
+
+        expect((ac.can('user').context({
+            a: {
+                b: [
+                    {
+                        c: 'C',
+                        n: {}
+                    }
+                ]
+            },
+            d: {
+                id: 2
+            }
+        }).execute('read').sync().on('A')).granted).toEqual(false);        
+
+        expect((ac.can('user').context({
+            a: {
+                b: [
+                    {
+                        c: 'E',
+                        n: {
+                            id: 2
+                        }
+                    }
+                ]
+            },
+            d: {
+                id: 2
+            }
+        }).execute('read').sync().on('A')).granted).toEqual(false);        
+
+        expect((ac.can('user').context({
+            a: {
+                b: []
+            },
+            d: {
+                id: 2
+            }
+        }).execute('read').sync().on('A')).granted).toEqual(false);        
+
+        expect((ac.can('user').context({
+            a: {},
+            d: {
+                id: 2
+            }
+        }).execute('read').sync().on('A')).granted).toEqual(false);        
     })
 
     it('should allow to use json path in the EQUALS condition args keys with "boolean-negative" values', function () {
