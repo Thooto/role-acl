@@ -1,4 +1,3 @@
-
 const AccessControl = require('../src').AccessControl;
 
 function type(o) {
@@ -2373,6 +2372,118 @@ describe('Test Suite: Access Control', function () {
         }, { query: true })).toEqual({
             attributes: [],
             include: [{ model: 'D', attributes: [] }]
+        });
+    });
+
+    it('should inject attributes with nested queries when no attributes are specified', function () {
+        const { Permission } = require("../src/core/Permission");
+        const permission = new Permission({});
+
+
+        let query = {
+            attributes: ["a", "b"],
+            include: [
+                {
+                    model: "A",
+                    required: true,
+                    attributes: ["a", "b", "c"],
+                },
+                {
+                    model: "B",
+                    include: [
+                        {
+                            model: "C",
+                            where: { d: 3 },
+                        },
+                    ],
+                },
+                { model: "D" },
+            ],
+        };
+
+        const attributes = {
+            a:null,
+            b:null,
+            A: {
+                a:null,
+                b:null,
+                c:null
+            },
+            B: {
+                C: {}
+            },
+            D: {}
+        }
+
+        expect(permission.buildAttributes(query)).toEqual(attributes)
+        permission.filterAttributes(query, attributes)
+        expect(query as any).toEqual({
+            attributes: ["a", "b"],
+            include: [
+                {
+                    model: "A",
+                    required: true,
+                    attributes: ["a", "b", "c"],
+                },
+                {
+                    model: "B",
+                    attributes: [],
+                    include: [
+                        {
+                            attributes: [],
+                            model: "C",
+                            where: { d: 3 },
+                        },
+                    ],
+                },
+                { attributes: [], model: "D" },
+            ]
+        })
+
+
+        query = {
+            attributes: ["a", "b"],
+            include: [
+                {
+                    model: "A",
+                    required: true,
+                    attributes: ["a", "b", "c"],
+                },
+                {
+                    model: "B",
+                    include: [
+                        {
+                            model: "C",
+                            where: { d: 3 },
+                        },
+                    ],
+                },
+                { model: "D" },
+            ],
+        };
+
+        permission.filter(query, { query: true });
+        expect(query as any).toEqual({
+            attributes: ["a", "b"],
+            include: [
+                {
+                    model: "A",
+                    required: true,
+                    attributes: ["a", "b", "c"],
+                },
+                {
+                    model: "B",
+                    attributes: [],
+                    include: [
+                        {
+                            attributes: [],
+                            model: "C",
+                            where: { d: 3 },
+                        },
+                    ],
+                },
+                { attributes: [], model: "D" },
+            ],
         });
     })
 });
