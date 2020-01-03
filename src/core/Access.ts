@@ -197,7 +197,7 @@ class Access {
      *           Self instance of `Access` so that you can chain and define
      *           another access instance to be committed.
      */
-    execute(action: string): Access {
+    execute(action: string | string[]): Access {
         this._.action = action;
         return this
     }
@@ -205,7 +205,7 @@ class Access {
     /**
      * Alias of `execute`
      */
-    action(action: string): Access {
+    action(action: string | string[]): Access {
         this._.action = action;
         return this
     }
@@ -231,7 +231,7 @@ class Access {
 
     /**
      *  @private
-     *  @param {String} action     [description]
+     *  @param {String|Array<String>} action     [description]
      *  @param {String|Array<String>} resource   [description]
      *  @param {String|Array<String>} attributes [description]
      *  @returns {Access}
