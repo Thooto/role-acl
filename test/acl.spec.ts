@@ -1,4 +1,5 @@
 const AccessControl = require('../src').AccessControl;
+import Joi from "@hapi/joi";
 
 function type(o) {
     return Object.prototype.toString.call(o).match(/\s(\w+)/i)[1].toLowerCase();
@@ -2485,5 +2486,50 @@ describe('Test Suite: Access Control', function () {
                 { attributes: [], model: "D" },
             ],
         });
+    })
+
+    it('shoud work with joi schemas', function () {
+        let ac = this.ac;
+
+        const reqSchema = Joi.object({
+            query: { where: { id: Joi.ref("/issuer.id") } },
+            issuer: { id: Joi.number() }
+        });
+
+        const req = {
+            query: { where: { id: 3 } },
+            issuer: { id: 3 }
+        };
+
+        const badReq = {
+            query: { where: { id: 3 } },
+            issuer: { id: 2 }
+        };
+
+        ac.grant("user").action("read").validate(reqSchema).on("resource");
+
+        expect(ac.can('user').context(req).execute('read').sync().on('resource').granted).toEqual(true);
+        expect(ac.can('user').context(badReq).execute('read').sync().on('resource').granted).toEqual(false);
+
+        const whereSchema = Joi.object().required()
+
+        const querySchema = Joi.object({
+             where: whereSchema.keys({ id: Joi.ref("$id") })
+        });
+
+        const reqWithQuery = {
+            query: { where: { id: 3 } },
+            issuer: { id: 3 }
+        };
+
+        const badReqWithQuery = {
+            query: {},
+            issuer: { id: 2 }
+        };
+
+        ac.grant("user").action("read").validateQuery(querySchema).on("resource2");
+
+        expect(ac.can('user').context(reqWithQuery).execute('read').sync().on('resource2').granted).toEqual(true);
+        expect(ac.can('user').context(badReqWithQuery).execute('read').sync().on('resource2').granted).toEqual(false);
     })
 });

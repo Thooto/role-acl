@@ -1,6 +1,7 @@
 import { CommonUtil } from './../utils/';
 import { IAccessInfo } from '../core';
 import { ICondition } from './ICondition';
+import Joi, { ObjectSchema, ValidationOptions } from '@hapi/joi';
 
 /**
  *  Represents the inner `Access` class that helps build an access information
@@ -223,6 +224,46 @@ class Access {
     when(condition: ICondition): Access {
         this._.condition = condition;
         return this
+    }
+
+    validate(schema: ObjectSchema): Access {
+        this._.condition = function (req: any) {
+            const { error, value } = schema.validate(req)
+
+            if (error) return false;
+            
+            Object.assign(req, value);
+
+            return true;
+        };
+
+        return this;
+    }
+
+    validateQuery(schema: ObjectSchema): Access {
+        this._.condition = function (req: any) {
+            const { error, value } = schema.validate(req.query, { context: req.issuer })
+
+            if (error) return false;
+            
+            req.query = value;
+            return true;
+        };
+
+        return this;
+    }
+
+    validateBody(schema: ObjectSchema): Access {
+        this._.condition = function (req: any) {
+            const { error, value } = schema.validate(req.body, { context: req.issuer })
+
+            if (error) return false;
+            
+            req.body = value;
+            return true;
+        };
+
+        return this;
     }
 
     // -------------------------------
